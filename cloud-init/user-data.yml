@@ -1,0 +1,13 @@
+#cloud-config
+# aptのパッケージリストを更新し、システムをアップグレードします
+package_update: true
+package_upgrade: true
+
+# ansibleをインストールします
+packages:
+  - ansible
+  - git
+
+# community.general ansible collectionをインストールします
+runcmd:
+  - [ ansible-galaxy, collection, install, community.general ]

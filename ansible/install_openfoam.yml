@@ -1,0 +1,40 @@
+---
+- name: Install OpenFOAM 2412
+  hosts: all
+  vars:
+    user_home: "{{ ansible_env.HOME }}"
+    bash_config_file: "{{ user_home }}/.bashrc"
+
+  tasks:
+    - name: Add OpenFOAM GPG key
+      become: yes
+      shell:
+        cmd: "wget -O - https://dl.openfoam.org/gpg.key | gpg --dearmor | tee /etc/apt/trusted.gpg.d/openfoam.gpg >/dev/null"
+      args:
+        creates: /etc/apt/trusted.gpg.d/openfoam.gpg
+
+    - name: Add OpenFOAM repository
+      become: yes
+      apt_repository:
+        repo: "deb http://dl.openfoam.org/ubuntu focal main"
+        state: present
+        filename: openfoam
+
+    - name: Update apt cache and install OpenFOAM
+      become: yes
+      apt:
+        name: openfoam2412
+        state: present
+        update_cache: yes
+
+    - name: Source OpenFOAM bashrc in user's .bashrc
+      become: no
+      blockinfile:
+        path: "{{ bash_config_file }}"
+        block: |
+          # Source OpenFOAM environment
+          if [ -f /opt/openfoam2412/etc/bashrc ]; then
+            source /opt/openfoam2412/etc/bashrc
+          fi
+        marker: "# {mark} ANSIBLE MANAGED BLOCK FOR OPENFOAM"
+        create: yes

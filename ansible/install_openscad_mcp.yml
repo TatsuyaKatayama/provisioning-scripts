@@ -1,0 +1,25 @@
+- name: Install OpenSCAD and openscad-mcp
+  hosts: all
+  vars:
+    user_home: "{{ ansible_env.HOME }}"
+    uv_path: "{{ user_home }}/.cargo/bin/uv"
+    venv_dir: "{{ user_home }}/.venvs/openscad-mcp"
+  tasks:
+    - name: Install OpenSCAD
+      become: yes
+      ansible.builtin.apt:
+        name: openscad
+        state: present
+        update_cache: yes
+
+    - name: Create a virtual environment for openscad-mcp
+      become: no
+      ansible.builtin.shell:
+        cmd: "{{ uv_path }} venv {{ venv_dir }}"
+        creates: "{{ venv_dir }}/bin/activate"
+
+    - name: Install openscad-mcp from GitHub into the virtual environment
+      become: no
+      ansible.builtin.shell:
+        cmd: "{{ venv_dir }}/bin/uv pip install git+https://github.com/quellant/openscad-mcp.git"
+        creates: "{{ venv_dir }}/bin/openscad-mcp"

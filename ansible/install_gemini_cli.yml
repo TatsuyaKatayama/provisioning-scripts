@@ -1,0 +1,25 @@
+---
+- name: Install Gemini CLI
+  hosts: all
+  become: yes
+  tasks:
+    - name: Ensure curl is installed
+      apt:
+        name: curl
+        state: present
+
+    - name: Setup Node.js 20.x repository
+      shell: "curl -fsSL https://deb.nodesource.com/setup_20.x | bash -"
+      args:
+        creates: /etc/apt/sources.list.d/nodesource.list
+
+    - name: Install Node.js
+      apt:
+        name: nodejs
+        state: present
+
+    - name: Install Gemini CLI using npm
+      community.general.npm:
+        name: "@google/gemini-cli"
+        global: yes
+        state: present

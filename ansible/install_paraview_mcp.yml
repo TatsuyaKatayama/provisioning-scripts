@@ -1,0 +1,18 @@
+- name: Install paraview-mcp with uv
+  hosts: all
+  become: no
+  vars:
+    user_home: "{{ ansible_env.HOME }}"
+    uv_path: "{{ user_home }}/.cargo/bin/uv"
+    venv_dir: "{{ user_home }}/.venvs/paraview-mcp"
+
+  tasks:
+    - name: Create a virtual environment for paraview-mcp
+      ansible.builtin.shell:
+        cmd: "{{ uv_path }} venv {{ venv_dir }}"
+        creates: "{{ venv_dir }}/bin/activate"
+
+    - name: Install paraview-mcp[cli] and httpx into the virtual environment
+      ansible.builtin.shell:
+        cmd: "{{ venv_dir }}/bin/uv pip install 'paraview-mcp[cli]' httpx"
+        creates: "{{ venv_dir }}/bin/paraview-mcp"
